@@ -1,0 +1,449 @@
+
+        ];<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flag Color Finder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .color-selector {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        .color-selector h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .color-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+        }
+
+        .color-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            padding: 15px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+        }
+
+        .color-option:hover {
+            background: #f5f5f5;
+        }
+
+        .color-option.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .color-swatch {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+            border: 3px solid #ddd;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .color-option.selected .color-swatch {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .color-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .results-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .results-header {
+            margin-bottom: 20px;
+        }
+
+        .results-header h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .results-count {
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .flags-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .flag-card {
+            background: #f9f9f9;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .flag-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .flag-image {
+            width: 100%;
+            height: 120px;
+            object-fit: contain;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+
+        .country-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95em;
+        }
+
+        .no-results {
+            text-align: center;
+            color: #666;
+            padding: 40px;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌍 Flag Color Finder</h1>
+        
+        <div class="color-selector">
+            <h2>Select Colors</h2>
+            <div class="color-options" id="colorOptions"></div>
+        </div>
+
+        <div class="results-section">
+            <div class="results-header">
+                <h2>Matching Flags</h2>
+                <div class="results-count" id="resultsCount"></div>
+            </div>
+            <div class="flags-grid" id="flagsGrid"></div>
+        </div>
+    </div>
+
+    <script>
+        const colors = [
+            { name: 'Red', hex: '#E4002B', value: 'red' },
+            { name: 'Blue', hex: '#0052B4', value: 'blue' },
+            { name: 'White', hex: '#FFFFFF', value: 'white' },
+            { name: 'Green', hex: '#009B3A', value: 'green' },
+            { name: 'Yellow', hex: '#FFD100', value: 'yellow' },
+            { name: 'Black', hex: '#000000', value: 'black' },
+            { name: 'Orange', hex: '#FF6600', value: 'orange' },
+            { name: 'Purple', hex: '#6F2DA8', value: 'purple' },
+            { name: 'Gold', hex: '#FFD700', value: 'gold' },
+            { name: 'Brown', hex: '#8B4513', value: 'brown' }
+        ];
+
+        const flagData = [
+            { country: 'Afghanistan', colors: ['black', 'red', 'green', 'white', 'gold'], flag: 'https://flagcdn.com/w320/af.png' },
+            { country: 'Albania', colors: ['red', 'black', 'gold'], flag: 'https://flagcdn.com/w320/al.png' },
+            { country: 'Algeria', colors: ['green', 'white', 'red'], flag: 'https://flagcdn.com/w320/dz.png' },
+            { country: 'Andorra', colors: ['blue', 'yellow', 'red', 'gold', 'green', 'brown'], flag: 'https://flagcdn.com/w320/ad.png' },
+            { country: 'Angola', colors: ['red', 'black', 'yellow', 'gold'], flag: 'https://flagcdn.com/w320/ao.png' },
+            { country: 'Antigua and Barbuda', colors: ['red', 'white', 'blue', 'black', 'yellow', 'gold'], flag: 'https://flagcdn.com/w320/ag.png' },
+            { country: 'Argentina', colors: ['blue', 'white', 'yellow', 'gold'], flag: 'https://flagcdn.com/w320/ar.png' },
+            { country: 'Armenia', colors: ['red', 'blue', 'orange'], flag: 'https://flagcdn.com/w320/am.png' },
+            { country: 'Australia', colors: ['blue', 'white', 'red'], flag: 'https://flagcdn.com/w320/au.png' },
+            { country: 'Austria', colors: ['red', 'white'], flag: 'https://flagcdn.com/w320/at.png' },
+            { country: 'Azerbaijan', colors: ['blue', 'red', 'green', 'white', 'gold'], flag: 'https://flagcdn.com/w320/az.png' },
+            { country: 'Bahamas', colors: ['blue', 'yellow', 'black', 'gold'], flag: 'https://flagcdn.com/w320/bs.png' },
+            { country: 'Bahrain', colors: ['white', 'red'], flag: 'https://flagcdn.com/w320/bh.png' },
+            { country: 'Bangladesh', colors: ['green', 'red'], flag: 'https://flagcdn.com/w320/bd.png' },
+            { country: 'Barbados', colors: ['blue', 'yellow', 'black', 'gold'], flag: 'https://flagcdn.com/w320/bb.png' },
+            { country: 'Belarus', colors: ['red', 'green', 'white'], flag: 'https://flagcdn.com/w320/by.png' },
+            { country: 'Belgium', colors: ['black', 'yellow', 'red'], flag: 'https://flagcdn.com/w320/be.png' },
+            { country: 'Belize', colors: ['blue', 'red', 'white', 'green', 'yellow', 'brown'], flag: 'https://flagcdn.com/w320/bz.png' },
+            { country: 'Benin', colors: ['green', 'yellow', 'red'], flag: 'https://flagcdn.com/w320/bj.png' },
+            { country: 'Bhutan', colors: ['orange', 'yellow', 'white', 'gold'], flag: 'https://flagcdn.com/w320/bt.png' },
+            { country: 'Bolivia', colors: ['red', 'yellow', 'green', 'gold'], flag: 'https://flagcdn.com/w320/bo.png' },
+            { country: 'Bosnia and Herzegovina', colors: ['blue', 'yellow', 'white', 'gold'], flag: 'https://flagcdn.com/w320/ba.png' },
+            { country: 'Botswana', colors: ['blue', 'white', 'black'], flag: 'https://flagcdn.com/w320/bw.png' },
+            { country: 'Brazil', colors: ['green', 'yellow', 'blue', 'white', 'gold'], flag: 'https://flagcdn.com/w320/br.png' },
+            { country: 'Brunei', colors: ['yellow', 'white', 'black', 'red', 'gold'], flag: 'https://flagcdn.com/w320/bn.png' },
+            { country: 'Bulgaria', colors: ['white', 'green', 'red'], flag: 'https://flagcdn.com/w320/bg.png' },
+            { country: 'Burkina Faso', colors: ['red', 'green', 'yellow', 'gold'], flag: 'https://flagcdn.com/w320/bf.png' },
+            { country: 'Burundi', colors: ['red', 'white', 'green', 'gold'], flag: 'https://flagcdn.com/w320/bi.png' },
+            { country: 'Cambodia', colors: ['blue', 'red', 'white', 'gold'], flag: 'https://flagcdn.com/w320/kh.png' },
+            { country: 'Cameroon', colors: ['green', 'red', 'yellow', 'gold'], flag: 'https://flagcdn.com/w320/cm.png' },
+            { country: 'Canada', colors: ['red', 'white'], flag: 'https://flagcdn.com/w320/ca.png' },
+            { country: 'Cape Verde', colors: ['blue', 'white', 'red', 'yellow', 'gold'], flag: 'https://flagcdn.com/w320/cv.png' },
+            { country: 'Central African Republic', colors: ['blue', 'white', 'green', 'yellow', 'red', 'gold'], flag: 'https://flagcdn.com/w320/cf.png' },
+            { country: 'Chad', colors: ['blue', 'yellow', 'red'], flag: 'https://flagcdn.com/w320/td.png' },
+            { country: 'Chile', colors: ['red', 'white', 'blue'], flag: 'https://flagcdn.com/w320/cl.png' },
+            { country: 'China', colors: ['red', 'yellow', 'gold'], flag: 'https://flagcdn.com/w320/cn.png' },
+            { country: 'Colombia', colors: ['yellow', 'blue', 'red'], flag: 'https://flagcdn.com/w320/co.png' },
+            { country: 'Comoros', colors: ['yellow', 'white', 'red', 'blue', 'green', 'gold'], flag: 'https://flagcdn.com/w320/km.png' },
+            { country: 'Costa Rica', colors: ['blue', 'white', 'red'], flag: 'https://flagcdn.com/w320/cr.png' },
+            { country: 'Croatia', colors: ['red', 'white', 'blue', 'yellow', 'gold'], flag: 'https://flagcdn.com/w320/hr.png' },
+            { country: 'Cuba', colors: ['blue', 'white', 'red'], flag: 'https://flagcdn.com/w320/cu.png' },
+            { country: 'Cyprus', colors: ['white', 'orange', 'green', 'gold'], flag: 'https://flagcdn.com/w320/cy.png' },
+            { country: 'Czech Republic', colors: ['white', 'red', 'blue'], flag: 'https://flagcdn.com/w320/cz.png' },
+            { country: 'Democratic Republic of the Congo', colors: ['blue', 'yellow', 'red', 'gold'], flag: 'https://flagcdn.com/w320/cd.png' },
+            { country: 'Denmark', colors: ['red', 'white'], flag: 'https://flagcdn.com/w320/dk.png' },
+            { country: 'Djibouti', colors: ['blue', 'green', 'white', 'red', 'gold'], flag: 'https://flagcdn.com/w320/dj.png' },
+            { country: 'Dominica', colors: ['green', 'yellow', 'black', 'white', 'red', 'purple', 'gold'], flag: 'https://flagcdn.com/w320/dm.png' },
+            { country: 'Dominican Republic', colors: ['blue', 'white', 'red', 'yellow', 'green', 'gold'], flag: 'https://flagcdn.com/w320/do.png' },
+            { country: 'East Timor', colors: ['red', 'yellow', 'black', 'white', 'gold'], flag: 'https://flagcdn.com/w320/tl.png' },
+            { country: 'Ecuador', colors: ['yellow', 'blue', 'red', 'gold', 'green', 'brown'], flag: 'https://flagcdn.com/w320/ec.png' },
+            { country: 'Egypt', colors: ['red', 'white', 'black', 'gold'], flag: 'https://flagcdn.com/w320/eg.png' },
+            { country: 'El Salvador', colors: ['blue', 'white', 'gold'], flag: 'https://flagcdn.com/w320/sv.png' },
+            { country: 'Equatorial Guinea', colors: ['green', 'white', 'red', 'blue', 'gold', 'brown'], flag: 'https://flagcdn.com/w320/gq.png' },
+            { country: 'Eritrea', colors: ['green', 'red', 'blue', 'yellow', 'gold'], flag: 'https://flagcdn.com/w320/er.png' },
+            { country: 'Estonia', colors: ['blue', 'black', 'white'], flag: 'https://flagcdn.com/w320/ee.png' },
+            { country: 'Eswatini', colors: ['blue', 'yellow', 'red', 'white', 'black', 'brown'], flag: 'https://flagcdn.com/w320/sz.png' },
+            { country: 'Ethiopia', colors: ['green', 'yellow', 'red', 'blue', 'gold'], flag: 'https://flagcdn.com/w320/et.png' },
+            { country: 'Fiji', colors: ['blue', 'red', 'white', 'gold'], flag: 'https://flagcdn.com/w320/fj.png' },
+            { country: 'Finland', colors: ['white', 'blue'], flag: 'https://flagcdn.com/w320/fi.png' },
+            { country: 'France', colors: ['blue', 'white', 'red'], flag: 'https://flagcdn.com/w320/fr.png' },
+            { country: 'Gabon', colors: ['green', 'yellow', 'blue'], flag: 'https://flagcdn.com/w320/ga.png' },
+            { country: 'Gambia', colors: ['red', 'blue', 'green', 'white'], flag: 'https://flagcdn.com/w320/gm.png' },
+            { country: 'Georgia', colors: ['white', 'red'], flag: 'https://flagcdn.com/w320/ge.png' },
+            { country: 'Germany', colors: ['black', 'red', 'yellow'], flag: 'https://flagcdn.com/w320/de.png' },
+            { country: 'Ghana', colors: ['red', 'yellow', 'green', 'black', 'gold'], flag: 'https://flagcdn.com/w320/gh.png' },
+            { country: 'Greece', colors: ['blue', 'white'], flag: 'https://flagcdn.com/w320/gr.png' },
+            { country: 'Grenada', colors: ['red', 'yellow', 'green', 'gold'], flag: 'https://flagcdn.com/w320/gd.png' },
+            { country: 'Guatemala', colors: ['blue', 'white', 'gold', 'green', 'red'], flag: 'https://flagcdn.com/w320/gt.png' },
+            { country: 'Guinea', colors: ['red', 'yellow', 'green'], flag: 'https://flagcdn.com/w320/gn.png' },
+            { country: 'Guinea-Bissau', colors: ['red', 'yellow', 'green', 'black', 'gold'], flag: 'https://flagcdn.com/w320/gw.png' },
+            { country: 'Guyana', colors: ['green', 'white', 'yellow', 'black', 'red', 'gold'], flag: 'https://flagcdn.com/w320/gy.png' },
+            { country: 'Haiti', colors: ['blue', 'red', 'white', 'green', 'gold'], flag: 'https://flagcdn.com/w320/ht.png' },
+            { country: 'Honduras', colors: ['blue', 'white', 'gold'], flag: 'https://flagcdn.com/w320/hn.png' },
+            { country: 'Hungary', colors: ['red', 'white', 'green'], flag: 'https://flagcdn.com/w320/hu.png' },
+            { country: 'Iceland', colors: ['blue', 'white', 'red'], flag: 'https://flagcdn.com/w320/is.png' },
+            { country: 'India', colors: ['orange', 'white', 'green', 'blue', 'gold'], flag: 'https://flagcdn.com/w320/in.png' },
+            { country: 'Indonesia', colors: ['red', 'white'], flag: 'https://flagcdn.com/w320/id.png' },
+            { country: 'Iran', colors: ['green', 'white', 'red', 'gold'], flag: 'https://flagcdn.com/w320/ir.png' },
+            { country: 'Iraq', colors: ['red', 'white', 'black', 'green', 'gold'], flag: 'https://flagcdn.com/w320/iq.png' },
+            { country: 'Ireland', colors: ['green', 'white', 'orange'], flag: 'https://flagcdn.com/w320/ie.png' },
+            { country: 'Israel', colors: ['blue', 'white'], flag: 'https://flagcdn.com/w320/il.png' },
+            { country: 'Italy', colors: ['green', 'white', 'red'], flag: 'https://flagcdn.com/w320/it.png' },
+            { country: 'Ivory Coast', colors: ['orange', 'white', 'green'], flag: 'https://flagcdn.com/w320/ci.png' },
+            { country: 'Jamaica', colors: ['green', 'yellow', 'black', 'gold'], flag: 'https://flagcdn.com/w320/jm.png' },
+            { country: 'Japan', colors: ['white', 'red'], flag: 'https://flagcdn.com/w320/jp.png' },
+            { country: 'Jordan', colors: ['black', 'white', 'green', 'red', 'gold'], flag: 'https://flagcdn.com/w320/jo.png' },
+            { country: 'Kazakhstan', colors: ['blue', 'yellow', 'gold'], flag: 'https://flagcdn.com/w320/kz.png' },
+            { country: 'Kenya', colors: ['black', 'red', 'green', 'white'], flag: 'https://flagcdn.com/w320/ke.png' },
+            { country: 'Kiribati', colors: ['red', 'white', 'blue', 'yellow', 'gold'], flag: 'https://flagcdn.com/w320/ki.png' },
+            { country: 'Kosovo', colors: ['blue', 'yellow', 'white', 'gold'], flag: 'https://flagcdn.com/w320/xk.png' },
+            { country: 'Kuwait', colors: ['green', 'white', 'red', 'black'], flag: 'https://flagcdn.com/w320/kw.png' },
+            { country: 'Kyrgyzstan', colors: ['red', 'yellow', 'gold'], flag: 'https://flagcdn.com/w320/kg.png' },
+            { country: 'Laos', colors: ['red', 'blue', 'white'], flag: 'https://flagcdn.com/w320/la.png' },
+            { country: 'Latvia', colors: ['red', 'white'], flag: 'https://flagcdn.com/w320/lv.png' },
+            { country: 'Lebanon', colors: ['red', 'white', 'green'], flag: 'https://flagcdn.com/w320/lb.png' },
+            { country: 'Lesotho', colors: ['blue', 'white', 'green', 'black'], flag: 'https://flagcdn.com/w320/ls.png' },
+            { country: 'Liberia', colors: ['red', 'white', 'blue'], flag: 'https://flagcdn.com/w320/lr.png' },
+            { country: 'Libya', colors: ['red', 'black', 'green', 'white', 'gold'], flag: 'https://flagcdn.com/w320/ly.png' },
+            { country: 'Liechtenstein', colors: ['blue', 'red', 'gold'], flag: 'https://flagcdn.com/w320/li.png' },
+            { country: 'Lithuania', colors: ['yellow', 'green', 'red'], flag: 'https://flagcdn.com/w320/lt.png' },
+            { country: 'Luxembourg', colors: ['red', 'white', 'blue'], flag: 'https://flagcdn.com/w320/lu.png' },
+            { country: 'Madagascar', colors: ['white', 'red', 'green'], flag: 'https://flagcdn.com/w320/mg.png' },
+            { country: 'Malawi', colors: ['black', 'red', 'green', 'gold'], flag: 'https://flagcdn.com/w320/mw.png' },
+            { country: 'Malaysia', colors: ['red', 'white', 'blue', 'yellow', 'gold'], flag: 'https://flagcdn.com/w320/my.png' },
+            { country: 'Maldives', colors: ['red', 'green', 'white'], flag: 'https://flagcdn.com/w320/mv.png' },
+            { country: 'Mali', colors: ['green', 'yellow', 'red'], flag: 'https://flagcdn.com/w320/ml.png' },
+            { country: 'Malta', colors: ['white', 'red'], flag: 'https://flagcdn.com/w320/mt.png' },
+            { country: 'Marshall Islands', colors: ['blue', 'white', 'orange', 'gold'], flag: 'https://flagcdn.com/w320/mh.png' },
+            { country: 'Mauritania', colors: ['green', 'yellow', 'red', 'gold'], flag: 'https://flagcdn.com/w320/mr.png' },
+            { country: 'Mauritius', colors: ['red', 'blue', 'yellow', 'green'], flag: 'https://flagcdn.com/w320/mu.png' },
+            { country: 'Mexico', colors: ['green', 'white', 'red', 'gold', 'brown'], flag: 'https://flagcdn.com/w320/mx.png' },
+            { country: 'Micronesia', colors: ['blue', 'white'], flag: 'https://flagcdn.com/w320/fm.png' },
+            { country: 'Moldova', colors: ['blue', 'yellow', 'red', 'gold', 'green', 'brown'], flag: 'https://flagcdn.com/w320/md.png' },
+            { country: 'Monaco', colors: ['red', 'white'], flag: 'https://flagcdn.com/w320/mc.png' },
+            { country: 'Mongolia', colors: ['red', 'blue', 'yellow', 'gold'], flag: 'https://flagcdn.com/w320/mn.png' },
+            { country: 'Montenegro', colors: ['red', 'gold', 'green', 'blue', 'white'], flag: 'https://flagcdn.com/w320/me.png' },
+            { country: 'Morocco', colors: ['red', 'green', 'gold'], flag: 'https://flagcdn.com/w320/ma.png' },
+            { country: 'Mozambique', colors: ['green', 'black', 'yellow', 'white', 'red', 'gold'], flag: 'https://flagcdn.com/w320/mz.png' },
+            { country: 'Myanmar', colors: ['yellow', 'green', 'red', 'white', 'gold'], flag: 'https://flagcdn.com/w320/mm.png' },
+            { country: 'Namibia', colors: ['blue', 'red', 'green', 'white', 'yellow', 'gold'], flag: 'https://flagcdn.com/w320/na.png' },
+            { country: 'Nauru', colors: ['blue', 'yellow', 'white', 'gold'], flag: 'https://flagcdn.com/w320/nr.png' },
+            { country: 'Nepal', colors: ['red', 'blue', 'white', 'gold'], flag: 'https://flagcdn.com/w320/np.png' },
+            { country: 'Netherlands', colors: ['red', 'white', 'blue'], flag: 'https://flagcdn.com/w320/nl.png' },
+            { country: 'New Zealand', colors: ['blue', 'red', 'white'], flag: 'https://flagcdn.com/w320/nz.png' },
+            { country: 'Nicaragua', colors: ['blue', 'white', 'gold'], flag: 'https://flagcdn.com/w320/ni.png' },
+            { country: 'Niger', colors: ['orange', 'white', 'green'], flag: 'https://flagcdn.com/w320/ne.png' },
+            { country: 'Nigeria', colors: ['green', 'white'], flag: 'https://flagcdn.com/w320/ng.png' },
+            { country: 'North Korea', colors: ['red', 'white', 'blue'], flag: 'https://flagcdn.com/w320/kp.png' },
+            { country: 'North Macedonia', colors: ['red', 'yellow', 'gold'], flag: 'https://flagcdn.com/w320/mk.png' },
+            { country: 'Norway', colors: ['red', 'white', 'blue'], flag: 'https://flagcdn.com/w320/no.png' },
+            { country: 'Oman', colors: ['white', 'red', 'green', 'gold'], flag: 'https://flagcdn.com/w320/om.png' },
+            { country: 'Pakistan', colors: ['green', 'white', 'gold'], flag: 'https://flagcdn.com/w320/pk.png' },
+            { country: 'Palau', colors: ['blue', 'yellow', 'gold'], flag: 'https://flagcdn.com/w320/pw.png' },
+            { country: 'Palestine', colors: ['black', 'white', 'green', 'red'], flag: 'https://flagcdn.com/w320/ps.png' },
+            { country: 'Panama', colors: ['blue', 'red', 'white'], flag: 'https://flagcdn.com/w320/pa.png' },
+            { country: 'Papua New Guinea', colors: ['red', 'black', 'yellow', 'white', 'gold'], flag: 'https://flagcdn.com/w320/pg.png' },
+            { country: 'Paraguay', colors: ['red', 'white', 'blue', 'yellow', 'green', 'gold'], flag: 'https://flagcdn.com/w320/py.png' },
+            { country: 'Peru', colors: ['red', 'white', 'gold', 'green'], flag: 'https://flagcdn.com/w320/pe.png' },
+            { country: 'Philippines', colors: ['blue', 'red', 'white', 'yellow', 'gold'], flag: 'https://flagcdn.com/w320/ph.png' },
+            { country: 'Poland', colors: ['white', 'red'], flag: 'https://flagcdn.com/w320/pl.png' },
+            { country: 'Portugal', colors: ['red', 'green', 'yellow', 'gold', 'blue', 'white'], flag: 'https://flagcdn.com/w320/pt.png' },
+            { country: 'Qatar', colors: ['white', 'red'], flag: 'https://flagcdn.com/w320/qa.png' },
+            { country: 'Republic of the Congo', colors: ['green', 'yellow', 'red'], flag: 'https://flagcdn.com/w320/cg.png' },
+            { country: 'Romania', colors: ['blue', 'yellow', 'red'], flag: 'https://flagcdn.com/w320/ro.png' },
+            { country: 'Russia', colors: ['white', 'blue', 'red'], flag: 'https://flagcdn.com/w320/ru.png' },
+            { country: 'Rwanda', colors: ['blue', 'yellow', 'green', 'gold'], flag: 'https://flagcdn.com/w320/rw.png' },
+            { country: 'Saint Kitts and Nevis', colors: ['green', 'red', 'yellow', 'black', 'white', 'gold'], flag: 'https://flagcdn.com/w320/kn.png' },
+            { country: 'Saint Lucia', colors: ['blue', 'yellow', 'black', 'white', 'gold'], flag: 'https://flagcdn.com/w320/lc.png' },
+            { country: 'Saint Vincent and the Grenadines', colors: ['blue', 'yellow', 'green', 'gold'], flag: 'https://flagcdn.com/w320/vc.png' },
+            { country: 'Samoa', colors: ['red', 'blue', 'white'], flag: 'https://flagcdn.com/w320/ws.png' },
+            { country: 'San Marino', colors: ['white', 'blue', 'gold', 'green', 'yellow'], flag: 'https://flagcdn.com/w320/sm.png' },
+            { country: 'Sao Tome and Principe', colors: ['green', 'yellow', 'red', 'black', 'gold'], flag: 'https://flagcdn.com/w320/st.png' },
+            { country: 'Saudi Arabia', colors: ['green', 'white', 'gold'], flag: 'https://flagcdn.com/w320/sa.png' },
+            { country: 'Senegal', colors: ['green', 'yellow', 'red', 'gold'], flag: 'https://flagcdn.com/w320/sn.png' },
+            { country: 'Serbia', colors: ['red', 'blue', 'white', 'gold'], flag: 'https://flagcdn.com/w320/rs.png' },
+            { country: 'Seychelles', colors: ['blue', 'yellow', 'red', 'white', 'green'], flag: 'https://flagcdn.com/w320/sc.png' },
+            { country: 'Sierra Leone', colors: ['green', 'white', 'blue'], flag: 'https://flagcdn.com/w320/sl.png' },
+            { country: 'Singapore', colors: ['red', 'white'], flag: 'https://flagcdn.com/w320/sg.png' },
+            { country: 'Slovakia', colors: ['white', 'blue', 'red'], flag: 'https://flagcdn.com/w320/sk.png' },
+            { country: 'Slovenia', colors: ['white', 'blue', 'red', 'yellow', 'gold'], flag: 'https://flagcdn.com/w320/si.png' },
+            { country: 'Solomon Islands', colors: ['blue', 'green', 'yellow', 'white', 'gold'], flag: 'https://flagcdn.com/w320/sb.png' },
+            { country: 'Somalia', colors: ['blue', 'white'], flag: 'https://flagcdn.com/w320/so.png' },
+            { country: 'South Africa', colors: ['red', 'green', 'blue', 'yellow', 'black', 'white', 'gold'], flag: 'https://flagcdn.com/w320/za.png' },
+            { country: 'South Korea', colors: ['white', 'red', 'blue', 'black'], flag: 'https://flagcdn.com/w320/kr.png' },
+            { country: 'South Sudan', colors: ['black', 'red', 'green', 'blue', 'white', 'yellow', 'gold'], flag: 'https://flagcdn.com/w320/ss.png' },
+            { country: 'Spain', colors: ['red', 'yellow', 'gold'], flag: 'https://flagcdn.com/w320/es.png' },
+            { country: 'Sri Lanka', colors: ['yellow', 'green', 'orange', 'red', 'gold'], flag: 'https://flagcdn.com/w320/lk.png' },
+            { country: 'Sudan', colors: ['red', 'white', 'black', 'green'], flag: 'https://flagcdn.com/w320/sd.png' },
+            { country: 'Suriname', colors: ['green', 'white', 'red', 'yellow', 'gold'], flag: 'https://flagcdn.com/w320/sr.png' },
+            { country: 'Sweden', colors: ['blue', 'yellow'], flag: 'https://flagcdn.com/w320/se.png' },
+            { country: 'Switzerland', colors: ['red', 'white'], flag: 'https://flagcdn.com/w320/ch.png' },
+            { country: 'Syria', colors: ['red', 'white', 'black', 'green', 'gold'], flag: 'https://flagcdn.com/w320/sy.png' },
+            { country: 'Taiwan', colors: ['red', 'blue', 'white'], flag: 'https://flagcdn.com/w320/tw.png' },
+            { country: 'Tajikistan', colors: ['red', 'white', 'green', 'yellow', 'gold'], flag: 'https://flagcdn.com/w320/tj.png' },
+            { country: 'Tanzania', colors: ['green', 'yellow', 'blue', 'black', 'gold'], flag: 'https://flagcdn.com/w320/tz.png' },
+            { country: 'Thailand', colors: ['red', 'white', 'blue'], flag: 'https://flagcdn.com/w320/th.png' },
+            { country: 'Togo', colors: ['green', 'yellow', 'red', 'white'], flag: 'https://flagcdn.com/w320/tg.png' },
+            { country: 'Tonga', colors: ['red', 'white'], flag: 'https://flagcdn.com/w320/to.png' },
+            { country: 'Trinidad and Tobago', colors: ['red', 'white', 'black'], flag: 'https://flagcdn.com/w320/tt.png' },
+            { country: 'Tunisia', colors: ['red', 'white'], flag: 'https://flagcdn.com/w320/tn.png' },
+            { country: 'Turkey', colors: ['red', 'white'], flag: 'https://flagcdn.com/w320/tr.png' },
+            { country: 'Turkmenistan', colors: ['green', 'white', 'red', 'gold'], flag: 'https://flagcdn.com/w320/tm.png' },
+            { country: 'Tuvalu', colors: ['blue', 'yellow', 'white', 'red', 'gold'], flag: 'https://flagcdn.com/w320/tv.png' },
+            { country: 'Uganda', colors: ['black', 'yellow', 'red', 'white', 'gold'], flag: 'https://flagcdn.com/w320/ug.png' },
+            { country: 'Ukraine', colors: ['blue', 'yellow'], flag: 'https://flagcdn.com/w320/ua.png' },
+            { country: 'United Arab Emirates', colors: ['red', 'green', 'white', 'black'], flag: 'https://flagcdn.com/w320/ae.png' },
+            { country: 'United Kingdom', colors: ['red', 'white', 'blue'], flag: 'https://flagcdn.com/w320/gb.png' },
+            { country: 'United States', colors: ['red', 'white', 'blue'], flag: 'https://flagcdn.com/w320/us.png' },
+            { country: 'Uruguay', colors: ['blue', 'white', 'yellow', 'gold'], flag: 'https://flagcdn.com/w320/uy.png' },
+            { country: 'Uzbekistan', colors: ['blue', 'white', 'green', 'red', 'gold'], flag: 'https://flagcdn.com/w320/uz.png' },
+            { country: 'Vanuatu', colors: ['red', 'green', 'black', 'yellow', 'gold'], flag: 'https://flagcdn.com/w320/vu.png' },
+            { country: 'Vatican City', colors: ['yellow', 'white', 'gold'], flag: 'https://flagcdn.com/w320/va.png' },
+            { country: 'Venezuela', colors: ['yellow', 'blue', 'red', 'white', 'gold'], flag: 'https://flagcdn.com/w320/ve.png' },
+            { country: 'Vietnam', colors: ['red', 'yellow', 'gold'], flag: 'https://flagcdn.com/w320/vn.png' },
+            { country: 'Yemen', colors: ['red', 'white', 'black'], flag: 'https://flagcdn.com/w320/ye.png' },
+            { country: 'Zambia', colors: ['green', 'red', 'black', 'orange', 'gold'], flag: 'https://flagcdn.com/w320/zm.png' },
+            { country: 'Zimbabwe', colors: ['green', 'yellow', 'red', 'black', 'white', 'gold'], flag: 'https://flagcdn.com/w320/zw.png' }
+       ];
+       
+            let selectedColors = [];
+
+        function initColorOptions() {
+            const container = document.getElementById('colorOptions');
+            colors.forEach(color => {
+                const option = document.createElement('div');
+                option.className = 'color-option';
+                option.innerHTML = `
+                    <div class="color-swatch" style="background-color: ${color.hex}; ${color.value === 'white' ? 'border-color: #ccc;' : ''}"></div>
+                    <div class="color-label">${color.name}</div>
+                `;
+                option.addEventListener('click', () => toggleColor(color.value, option));
+                container.appendChild(option);
+            });
+        }
+
+        function toggleColor(colorValue, element) {
+            const index = selectedColors.indexOf(colorValue);
+            if (index > -1) {
+                selectedColors.splice(index, 1);
+                element.classList.remove('selected');
+            } else {
+                selectedColors.push(colorValue);
+                element.classList.add('selected');
+            }
+            updateResults();
+        }
+
+        function updateResults() {
+            const resultsCount = document.getElementById('resultsCount');
+            const flagsGrid = document.getElementById('flagsGrid');
+            
+            if (selectedColors.length === 0) {
+                resultsCount.textContent = 'Select colors to find matching flags';
+                flagsGrid.innerHTML = '<div class="no-results">👆 Select one or more colors above to discover flags!</div>';
+                return;
+            }
+
+            const matchingFlags = flagData.filter(flag => 
+                selectedColors.every(color => flag.colors.includes(color))
+            );
+
+            resultsCount.textContent = `Found ${matchingFlags.length} matching flag${matchingFlags.length !== 1 ? 's' : ''}`;
+
+            if (matchingFlags.length === 0) {
+                flagsGrid.innerHTML = '<div class="no-results">No flags found with this color combination. Try a different selection!</div>';
+                return;
+            }
+
+            flagsGrid.innerHTML = matchingFlags.map(flag => `
+                <div class="flag-card">
+                    <img src="${flag.flag}" alt="${flag.country} flag" class="flag-image">
+                    <div class="country-name">${flag.country}</div>
+                </div>
+            `).join('');
+        }
+
+        initColorOptions();
+        updateResults();
+    </script>
+</body>
+</html>
